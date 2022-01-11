@@ -54,19 +54,19 @@ MQTT_SERVER="192.168.0.210"
 MQTT_PORT=1883
 # Full MQTT_topic = MQTT_BASE + MQTT_TYPE
 MQTT_BASE_TOPIC = "1R1/014"
-MQTT_TYPE_TOPIC = "temperature"
+MQTT_TYPE_TOPIC = "shutter"
 MQTT_PUB = "/".join([MQTT_BASE_TOPIC, MQTT_TYPE_TOPIC])
+MQTT_SUB = "/".join([MQTT_PUB, "command"])
 
 # First subscription to same topic (for tests)
-MQTT_SUB = MQTT_PUB
+#MQTT_SUB = MQTT_PUB
 # ... then subscribe to <topic>/command to receive orders
-#MQTT_SUB = "/".join([MQTT_PUB, "command"])
 
 MQTT_QOS=0 # (default) no ACK from server
 #MQTT_QOS=1 # server will ack every message
 
-MQTT_USER="123456"
-MQTT_PASSWD="123456"
+MQTT_USER="azerty"
+MQTT_PASSWD="azerty"
 
 # Measurement related
 # seconds between each measure.
@@ -135,7 +135,7 @@ def on_connect(client, userdata, flags, rc):
 
 
 # The callback for a received message from the server.
-def on_message(client, userdata, msg):
+def on_message_old(client, userdata, msg):
     ''' process incoming message.
         WARNING: threaded environment! '''
     payload = json.loads(msg.payload.decode('utf-8'))
@@ -147,6 +147,20 @@ def on_message(client, userdata, msg):
 
     # TO BE CONTINUED
     print("TODO: process incoming message!")
+
+def on_message(client, userdata, msg):
+    ''' process incoming message. WARNING: threaded environment! '''
+    payload = json.loads(msg.payload.decode('utf-8'))
+    if(payload['topic'] == MQTT_SUB):
+        if(payload['value']=='UP'):
+            print('UP')
+        elif(payload['value'] == 'DOWN'):
+            print('DOWN')
+        else:
+            print('NULL')
+    print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
+
+
 
 
 # The callback to tell that the message has been sent (QoS0) or has gone
@@ -165,20 +179,21 @@ def on_log(mosq, obj, level, string):
 # Acquire sensors and publish
 def publishSensors():
     # get CPU temperature (string)
-    CPU_temp = getCPUtemperature()
-    # add some randomisation to the temperature (float)
-    _fcputemp = float(CPU_temp) + random.uniform(-10,10)
-    # reconvert to string with quantization
-    CPU_temp = "{:.2f}".format(_fcputemp)
-    print("RPi temperature = " + CPU_temp)
-    # generate json payload
-    jsonFrame = {}
-    jsonFrame['unitID'] = str(getmac())
-    jsonFrame['value'] = json.loads(CPU_temp)
-    jsonFrame['value_units'] = 'celsius'
-    # ... and publish it!
-    client.publish(MQTT_PUB, json.dumps(jsonFrame), MQTT_QOS)
-
+    ## get CPU temperature (string)
+    #CPU_temp = getCPUtemperature()
+    ## add some randomisation to the temperature (float)
+    #_fcputemp = float(CPU_temp) + random.uniform(-10,10)
+    ## reconvert to string with quantization
+    #CPU_temp = "{:.2f}".format(_fcputemp)
+    #print("RPi temperature = " + CPU_temp)
+    ## generate json payload
+    #jsonFrame = {}
+    #jsonFrame['unitID'] = str(getmac())
+    #jsonFrame['value'] = json.loads(CPU_temp)
+    #jsonFrame['value_units'] = 'celsius'
+    ## ... and publish it!
+    #client.publish(MQTT_PUB, json.dumps(jsonFrame), MQTT_QOS)
+    print('publishing...\n')
 
 # #############################################################################
 #
@@ -199,8 +214,8 @@ def main():
     signal.signal(signal.SIGINT, ctrlc_handler)
 
     # MQTT setup
-    client = mqtt.Client( clean_session=True, userdata=None )
-    client.username_pw_set(username="123456",password="123456")
+    client = mqtt.Client()
+    client.username_pw_set(username="azerty",password="azerty")
     client.on_connect = on_connect
     client.on_message = on_message
     client.on_publish = on_publish
