@@ -87,7 +87,6 @@ class CommunicationModule(Thread):
         self._connection.on_message = self._on_message
         self._connection.on_subscribe = self._on_subscribe
         self._connection.on_unsubscribe = self._on_unsubscribe
-        self._connection.on_log = self._on_log
 
         self._connection.reconnect_delay_set( min_delay=100)
         self._connection.username_pw_set( MQTT_USER, MQTT_PASSWD )
@@ -118,10 +117,7 @@ class CommunicationModule(Thread):
             print("shutdown activated ...")
 
         except Exception as ex:
-            if getLogLevel().lower() == "debug":
-                print("module crashed (high details): " + str(ex), exc_info=True)
-            else:
-                print("module crashed: " + str(ex))
+            print("module crashed: " + str(ex))
 
         # shutdown module
         print("module stopping")
