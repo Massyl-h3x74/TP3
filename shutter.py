@@ -154,7 +154,7 @@ def on_message(self, client, userdata, msg):
     #log.debug("receiving a msg on topic '%s' ..." % str(msg.topic) )
     try:
         # loading and verifying payload
-        payload = json.loads(msg.payload.decode('utf-8'))
+        payload = json.loads(msg)
         #validictory.validate(payload, self.COMMAND_SCHEMA)
     except Exception as ex:
         log.error("exception handling json payload from topic '%s': " % str(msg.topic) + str(ex))
