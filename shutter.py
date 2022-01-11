@@ -149,23 +149,24 @@ def on_message_old(client, userdata, msg):
     # TO BE CONTINUED
     print("TODO: process incoming message!")
 
-def on_message(client, userdata, msg):
-    ''' process incoming message. WARNING: threaded environment! '''
-    print(msg)
-    payload = json.loads(msg.decode('utf-8'))
-    print(payload)
-    #print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
-    #if(payload['topic'] == MQTT_SUB):
-    #    if(payload['value']=='UP'):
-    #        print('UP')
-    #        jsonFrame = {}
-    #        jsonFrame['unitID'] = str('shutter-01')
-    #        jsonFrame['value'] = json.loads('UP : SUCCESS')
-    #        client.publish(MQTT_PUB, json.dumps(jsonFrame), MQTT_QOS)
-    #    elif(payload['value'] == 'DOWN'):
-    #        print('DOWN')
-    #    else:
-    #        print('NULL')
+def _on_message(self, client, userdata, msg):
+    ''' paho callback for message reception '''
+    #log.debug("receiving a msg on topic '%s' ..." % str(msg.topic) )
+    try:
+        # loading and verifying payload
+        payload = json.loads(msg.payload.decode('utf-8'))
+        #validictory.validate(payload, self.COMMAND_SCHEMA)
+    except Exception as ex:
+        log.error("exception handling json payload from topic '%s': " % str(msg.topic) + str(ex))
+        return
+    # is it a message for us ??
+    if( self._unitID is not None and payload['dest'] != "all" and payload['dest'] != str(self.unitID) ):
+        log.debug("msg received on topic '%s' features destID='%s' != self._unitID='%s'" % (str(msg.topic),payload['dest'],self.unitID) )
+        return
+    self.handle_message( msg.topic, payload )
+
+def handle_message(topic, payload):
+    print('TOPIC:'+topic+',PAYLOAD='+payload)
 
 
 
