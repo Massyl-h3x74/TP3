@@ -27,7 +27,6 @@ from random import randint
 
 
 # --- project related imports
-import settings
 from logger import log, getLogLevel
 
 MQTT_SERVER="192.168.0.210"
@@ -94,7 +93,7 @@ class CommunicationModule(Thread):
         self._connection.on_unsubscribe = self._on_unsubscribe
         self._connection.on_log = self._on_log
 
-        self._connection.reconnect_delay_set( min_delay=settings.MQTT_RECONNECT_DELAY )
+        self._connection.reconnect_delay_set( min_delay=100)
         self._connection.username_pw_set( MQTT_USER, MQTT_PASSWD )
 
         self._connected = False
@@ -110,7 +109,7 @@ class CommunicationModule(Thread):
 
         # start connection
         log.info("start MQTT connection to '%s:%d' ..." % (MQTT_SERVER,MQTT_PORT))
-        self._connection.connect( host=MQTT_SERVER, port=MQTT_PORT, keepalive=settings.MQTT_KEEP_ALIVE )
+        self._connection.connect( host=MQTT_SERVER, port=MQTT_PORT, keepalive=1)
 
         # launch
         try:
@@ -221,7 +220,7 @@ class CommunicationModule(Thread):
             return
 
         # unexpected disconnect ... we'll retry till death ...
-        _time2sleep = randint( settings.MQTT_RECONNECT_DELAY, settings.MQTT_RECONNECT_DELAY**2 )
+        _time2sleep = randint( 0, 2 )
         while( rc != mqtt_client.MQTT_ERR_SUCCESS and self._shutdownEvent.is_set() is not True):
             if (_time2sleep > 300):     # max. 5mn between two retrials
                 _time2sleep = 300

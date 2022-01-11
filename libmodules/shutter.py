@@ -11,7 +11,7 @@ import threading
 import paho.mqtt.client as mqtt_client
 import os
 import sys
-from libmodules.connection_interface import CommunicationModule
+from connection_interface import CommunicationModule
 
 # MQTT CLIENT CONF #############################################################################
 MQTT_SERVER="192.168.0.210"
