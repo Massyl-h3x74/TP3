@@ -86,13 +86,13 @@ class Shutter(CommunicationModule):
         payload = json.loads(msg.payload.decode('utf-8'))
         if(payload['topic'] == MQTT_SUB):
             if(payload['value']=='UP'):
-                log.debug('UP')
+                print('UP')
             elif(payload['value'] == 'DOWN'):
-                log.debug('DOWN')
+                print('DOWN')
             else:
-                 log.debug('UNDIFINED')
+                 print('UNDIFINED')
 
-        log.debug(
+        print(
             "Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
 
 
@@ -112,12 +112,8 @@ def main():
 # Execution or import
 if __name__ == "__main__":
 
-    # Logging setup
-    logging.basicConfig(format="[%(asctime)s][%(module)s:%(funcName)s:%(lineno)d][%(levelname)s] %(message)s", stream=sys.stdout)
-    log = logging.getLogger()
-
     print("\n[DBG] DEBUG mode activated ... ")
-    log.setLevel(logging.DEBUG)
+
     #log.setLevel(logging.INFO)
 
     # Start executing
