@@ -149,7 +149,7 @@ def on_message_old(client, userdata, msg):
     # TO BE CONTINUED
     print("TODO: process incoming message!")
 
-def _on_message(self, client, userdata, msg):
+def on_message(self, client, userdata, msg):
     ''' paho callback for message reception '''
     #log.debug("receiving a msg on topic '%s' ..." % str(msg.topic) )
     try:
