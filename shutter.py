@@ -154,11 +154,15 @@ def on_message(client, userdata, msg):
     if(payload['topic'] == MQTT_SUB):
         if(payload['value']=='UP'):
             print('UP')
+            jsonFrame = {}
+            jsonFrame['unitID'] = str('shutter-01')
+            jsonFrame['value'] = json.loads('UP : SUCCESS')
+            client.publish(MQTT_PUB, json.dumps(jsonFrame), MQTT_QOS)
         elif(payload['value'] == 'DOWN'):
             print('DOWN')
         else:
             print('NULL')
-    print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
+    #print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
 
 
 
@@ -191,8 +195,8 @@ def publishSensors():
     #jsonFrame['unitID'] = str(getmac())
     #jsonFrame['value'] = json.loads(CPU_temp)
     #jsonFrame['value_units'] = 'celsius'
-    ## ... and publish it!
     #client.publish(MQTT_PUB, json.dumps(jsonFrame), MQTT_QOS)
+    ## ... and publish it!
     print('publishing...\n')
 
 # #############################################################################
