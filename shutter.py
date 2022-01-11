@@ -151,8 +151,9 @@ def on_message_old(client, userdata, msg):
 
 def on_message(client, userdata, msg):
     ''' process incoming message. WARNING: threaded environment! '''
-    #payload = json.loads(msg.payload.decode('utf-8'))
     print(msg)
+    payload = json.loads(msg.decode('utf-8'))
+    print(payload)
     #print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
     #if(payload['topic'] == MQTT_SUB):
     #    if(payload['value']=='UP'):
