@@ -150,19 +150,19 @@ def on_message_old(client, userdata, msg):
 
 def on_message(client, userdata, msg):
     ''' process incoming message. WARNING: threaded environment! '''
-    payload = json.loads(msg.payload.decode('utf-8'))
-    if(payload['topic'] == MQTT_SUB):
-        if(payload['value']=='UP'):
-            print('UP')
-            jsonFrame = {}
-            jsonFrame['unitID'] = str('shutter-01')
-            jsonFrame['value'] = json.loads('UP : SUCCESS')
-            client.publish(MQTT_PUB, json.dumps(jsonFrame), MQTT_QOS)
-        elif(payload['value'] == 'DOWN'):
-            print('DOWN')
-        else:
-            print('NULL')
-    #print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
+    print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
+    #payload = json.loads(msg.payload.decode('utf-8'))
+    #if(payload['topic'] == MQTT_SUB):
+    #    if(payload['value']=='UP'):
+    #        print('UP')
+    #        jsonFrame = {}
+    #        jsonFrame['unitID'] = str('shutter-01')
+    #        jsonFrame['value'] = json.loads('UP : SUCCESS')
+    #        client.publish(MQTT_PUB, json.dumps(jsonFrame), MQTT_QOS)
+    #    elif(payload['value'] == 'DOWN'):
+    #        print('DOWN')
+    #    else:
+    #        print('NULL')
 
 
 
