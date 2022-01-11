@@ -131,6 +131,7 @@ def on_connect(client, userdata, flags, rc):
     if( rc == 0 ):
         log.info("subscribing to topic: %s" % MQTT_SUB)
         # Subscribe to topic
+        print('CLIENT SUBCRIBED TO :'+MQTT_SUB)
         client.subscribe(MQTT_SUB);
 
 
