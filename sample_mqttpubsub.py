@@ -139,26 +139,26 @@ def on_message(client, userdata, msg):
     ''' process incoming message.
         WARNING: threaded environment! '''
     payload = json.loads(msg.payload.decode('utf-8'))
-    log.debug("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
+    print("Received message '" + json.dumps(payload) + "' on topic '" + msg.topic + "' with QoS " + str(msg.qos))
 
     # First test: subscribe to your own publish topic
     # ... then remove later
-    log.debug("Temperature is %s deg. %s" % (payload['value'],payload['value_units']))
+    print("Temperature is %s deg. %s" % (payload['value'],payload['value_units']))
 
     # TO BE CONTINUED
-    log.warning("TODO: process incoming message!")
+    print("TODO: process incoming message!")
 
 
 # The callback to tell that the message has been sent (QoS0) or has gone
 # through all of the handshake (QoS1 and 2)
 def on_publish(client, userdata, mid):
-    log.debug("mid: " + str(mid)+ " published!")
+    print("mid: " + str(mid)+ " published!")
 
 def on_subscribe(mosq, obj, mid, granted_qos):
-    log.debug("Subscribed: " + str(mid) + " " + str(granted_qos))
+    print("Subscribed: " + str(mid) + " " + str(granted_qos))
 
 def on_log(mosq, obj, level, string):
-    log.debug(string)
+    print(string)
 
 
 # --- neOCampus related functions ---------------------------------------------
@@ -170,7 +170,7 @@ def publishSensors():
     _fcputemp = float(CPU_temp) + random.uniform(-10,10)
     # reconvert to string with quantization
     CPU_temp = "{:.2f}".format(_fcputemp)
-    log.debug("RPi temperature = " + CPU_temp)
+    print("RPi temperature = " + CPU_temp)
     # generate json payload
     jsonFrame = {}
     jsonFrame['unitID'] = str(getmac())
