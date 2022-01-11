@@ -160,9 +160,7 @@ def on_message(self, client, userdata, msg):
         log.error("exception handling json payload from topic '%s': " % str(msg.topic) + str(ex))
         return
     # is it a message for us ??
-    if( self._unitID is not None and payload['dest'] != "all" and payload['dest'] != str(self.unitID) ):
-        log.debug("msg received on topic '%s' features destID='%s' != self._unitID='%s'" % (str(msg.topic),payload['dest'],self.unitID) )
-        return
+    log.debug("msg received on topic '%s' features destID='%s' != self._unitID='%s'" % (str(msg.topic),payload['dest'],self.unitID))
     self.handle_message( msg.topic, payload )
 
 def handle_message(topic, payload):
