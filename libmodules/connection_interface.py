@@ -25,10 +25,6 @@ from threading import Thread, Event
 import paho.mqtt.client as mqtt_client
 from random import randint
 
-
-# --- project related imports
-from logger import log, getLogLevel
-
 MQTT_SERVER="192.168.0.210"
 MQTT_PORT=1883
 # Full MQTT_topic = MQTT_BASE + MQTT_TYPE
@@ -69,14 +65,14 @@ class CommunicationModule(Thread):
     # object initialization
     def __init__(self, mqtt_topics, *args, **kwargs ):
         super().__init__()
-        log.debug("initializing comm module")
+        print("initializing comm module")
         self._mqtt_topics   = mqtt_topics
         self._addons        = kwargs
 
         # check for _shutdown event
         self._shutdownEvent = self._addons.get('_shutdownEvent')
         if( self._shutdownEvent is None ):
-            log.warning("unspecified global shutdown ... thus locally specified ...")
+            print("unspecified global shutdown ... thus locally specified ...")
             self._shutdownEvent = Event()
 
         # check for unitID
@@ -97,18 +93,18 @@ class CommunicationModule(Thread):
         self._connection.username_pw_set( MQTT_USER, MQTT_PASSWD )
 
         self._connected = False
-        log.debug("initialization done")
+        print("initialization done")
 
 
     #
     # called by Threading.start()
     def run( self ):
         # load module
-        log.info("module loading")
+        print("module loading")
         self.load()
 
         # start connection
-        log.info("start MQTT connection to '%s:%d' ..." % (MQTT_SERVER,MQTT_PORT))
+        print("start MQTT connection to '%s:%d' ..." % (MQTT_SERVER,MQTT_PORT))
         self._connection.connect( host=MQTT_SERVER, port=MQTT_PORT, keepalive=1)
 
         # launch
@@ -116,26 +112,26 @@ class CommunicationModule(Thread):
             while not self._shutdownEvent.is_set():
 
                 if self._connection.loop(timeout=2.0) != mqtt_client.MQTT_ERR_SUCCESS:
-                    log.debug("loop failed, sleeping a bit before retrying")
+                    print("loop failed, sleeping a bit before retrying")
                     time.sleep(2)
 
-            log.debug("shutdown activated ...")
+            print("shutdown activated ...")
 
         except Exception as ex:
             if getLogLevel().lower() == "debug":
-                log.error("module crashed (high details): " + str(ex), exc_info=True)
+                print("module crashed (high details): " + str(ex), exc_info=True)
             else:
-                log.error("module crashed: " + str(ex))
+                print("module crashed: " + str(ex))
 
         # shutdown module
-        log.info("module stopping")
+        print("module stopping")
         self.quit()
 
         # disconnect ...
         self._connection.disconnect()
 
         # end of thread
-        log.info("Thread end ...")
+        print("Thread end ...")
 
 
     ''' are we connected ? '''
@@ -146,20 +142,20 @@ class CommunicationModule(Thread):
     ''' prepares and sends a payload in a MQTT message '''
     def send_message(self, topic, payload):
         if not self.is_connected():
-            log.warn("tried to publish a message while not connected ...")
+            print("tried to publish a message while not connected ...")
             return
 
         if 'unitID' not in payload:
             payload['unitID'] = self._unitID
 
         if( payload['unitID'] is None ):
-            log.warn("tried to publish a message while not having a unitID ... aborting")
+            print("tried to publish a message while not having a unitID ... aborting")
             return
 
         res, mid = self._connection.publish(topic, json.dumps(payload))
 
         if res != mqtt_client.MQTT_ERR_SUCCESS:
-            log.error("on message published to topic " + topic)
+            print("on message published to topic " + topic)
 
 
     ''' handles pre-validated MQTT messages, to be implemented by subclasses '''
@@ -194,26 +190,26 @@ class CommunicationModule(Thread):
     def _on_connect(self, client, userdata, flags, rc):
 
         if rc != mqtt_client.MQTT_ERR_SUCCESS:
-            log.error("unable to connect to broker '%s:%d': " % (self._addons['mqtt_server'],self._addons['mqtt_port']) + mqtt_client.error_string(rc))
+            print("unable to connect to broker '%s:%d': " % (self._addons['mqtt_server'],self._addons['mqtt_port']) + mqtt_client.error_string(rc))
             return
 
-        log.info("connected to broker :)")
+        print("connected to broker :)")
         self._connected = True
 
         # subscribe to topics list
         try:
             for topic in self._mqtt_topics:
-                log.debug("subscribing to " + str(topic))
+                print("subscribing to " + str(topic))
                 self._connection.subscribe( topic )   # QoS=0 default
 
         except Exception as ex:
-            log.warn("exception while subscribing to topic '%s' :" % str(topic) + str(ex))
+            print("exception while subscribing to topic '%s' :" % str(topic) + str(ex))
 
 
     ''' paho callback for disconnection '''
     def _on_disconnect(self, client, userdata, rc):
 
-        log.info("disconnected from MQTT broker with rc: " + mqtt_client.error_string(rc))
+        print("disconnected from MQTT broker with rc: " + mqtt_client.error_string(rc))
         self._connected = False
         if rc == mqtt_client.MQTT_ERR_SUCCESS:
             # means that disconnect has been requested (i.e not an unexpected event)
@@ -224,37 +220,37 @@ class CommunicationModule(Thread):
         while( rc != mqtt_client.MQTT_ERR_SUCCESS and self._shutdownEvent.is_set() is not True):
             if (_time2sleep > 300):     # max. 5mn between two retrials
                 _time2sleep = 300
-            log.info("Unexpected disconnection ... sleeping %d seconds before retrying" % _time2sleep)
+            print("Unexpected disconnection ... sleeping %d seconds before retrying" % _time2sleep)
             time.sleep(_time2sleep)
-            log.info("... trying to reconnect ...")
+            print("... trying to reconnect ...")
             try:
                 rc = self._connection.reconnect()
             except Exception as ex:
-                log.info("caught exception while mqtt reconnect: " + str(ex) )
+                print("caught exception while mqtt reconnect: " + str(ex) )
                 rc = -1
             _time2sleep = _time2sleep*2
 
 
     ''' paho callback for published message '''
     def _on_publish(self, client, userdata, mid):
-        log.debug("mid: " + str(mid)+ " published!")
+        print("mid: " + str(mid)+ " published!")
 
 
     ''' paho callback for message reception '''
     def _on_message(self, client, userdata, msg):
 
-        #log.debug("receiving a msg on topic '%s' ..." % str(msg.topic) )
+        #print("receiving a msg on topic '%s' ..." % str(msg.topic) )
         try:
             # loading and verifying payload
             payload = json.loads(msg.payload.decode('utf-8'))
             #validictory.validate(payload, self.COMMAND_SCHEMA)
         except Exception as ex:
-            log.error("exception handling json payload from topic '%s': " % str(msg.topic) + str(ex))
+            print("exception handling json payload from topic '%s': " % str(msg.topic) + str(ex))
             return
 
         # is it a message for us ??
         if( self._unitID is not None and payload['dest'] != "all" and payload['dest'] != str(self.unitID) ):
-            log.debug("msg received on topic '%s' features destID='%s' != self._unitID='%s'" % (str(msg.topic),payload['dest'],self.unitID) )
+            print("msg received on topic '%s' features destID='%s' != self._unitID='%s'" % (str(msg.topic),payload['dest'],self.unitID) )
             return
 
         self.handle_message( msg.topic, payload )
@@ -262,7 +258,7 @@ class CommunicationModule(Thread):
 
     ''' paho callback for topic subscriptions '''
     def _on_subscribe(self, client, userdata, mid, granted_qos):
-        log.debug("Subscribed: " + str(mid) + " " + str(granted_qos))
+        print("Subscribed: " + str(mid) + " " + str(granted_qos))
         self._connected = True
 
 
